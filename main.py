@@ -2,6 +2,7 @@
 
 import numpy as np
 import numpy.linalg as la
+import copy
 import time
 
 """
@@ -99,6 +100,55 @@ def Gauss_Seidel(A, b, size):
 
 
 def LU(A, b, size):
+    start = time.time()
+    U = copy.deepcopy(A)
+    L = np.eye(size)
+    for k in range(size - 1):
+        for j in range(k + 1, size):
+            L[j][k] = U[j][k] / U[k][k]
+            for i in range(k, size):
+                U[j][i] = U[j][i] - L[j][k] * U[k][i]
+
+    y = forward_substitution(L, b, size)
+    x = backward_substitution(U, y, size)
+    end = time.time()
+    return x, end - start
+
+    """
+        function that calculates system of linear equations with forward substituion
+        @param A matrix of coefficients
+        @param b vector of free variables
+        @param size size of square matrix and vector
+        @return vector with solution
+    """
+
+
+def forward_substitution(A, b, size):
+    x = np.zeros(shape=[size, 1])
+    for i in range(size):
+        sum = 0
+        for j in range(i):
+            sum += A[i][j] * x[j]
+        x[i] = (b[i] - sum) / A[i][i]
+    return x
+
+    """
+        function that calculates system of linear equations with forward substituion
+        @param A matrix of coefficients
+        @param b vector of free variables
+        @param size size of square matrix and vector
+        @return vector with solution
+    """
+
+
+def backward_substitution(A, b, size):
+    x = np.zeros(shape=[size, 1])
+    for i in range(size - 1, -1, -1):
+        sum = 0
+        for j in range(i + 1, size):
+            sum += A[i][j] * x[j]
+        x[i] = (b[i] - sum) / A[i][i]
+    return x
 
 
 c = 5   # penultimate number of index
@@ -107,10 +157,11 @@ e = 4   # 4th number of index
 f = 5   # 3rd number of index
 
 # task A data
-a1 = 3
+a1 = 5 + e
 a2 = a3 = -1
 
-N = 900 + 10 * c + d   # size of matrix A
+N = 20
+# N = 900 + 10 * c + d   # size of matrix A
 
 A = np.zeros(shape=[N, N])
 b = np.empty(shape=[N, 1])
@@ -126,6 +177,13 @@ for i in range(N):
         A[i + 2][i] = a3
         A[i][i + 2] = a3
 
+LU_sol, LU_time = LU(A, b, N)
+Jacobi_sol, Jacobi_iter, Jacobi_time = Jacobi(A, b, N)
+
+print(vector_norm(np.dot(A, LU_sol) - b))
+
+for i in range(N):
+    print(LU_sol[i], Jacobi_sol[i], sep=' ')
 
 # Gauss_sol, Gauss_iter, Gauss_time = Gauss_Seidel(A, b, N)
 # Jacobi_sol, Jacobi_iter, Jacobi_time = Jacobi(A, b, N)
