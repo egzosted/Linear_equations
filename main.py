@@ -1,7 +1,7 @@
 # Michał Piekarski 175456
 
 import numpy as np
-import numpy.linalg as la
+import matplotlib.pyplot as plt
 import copy
 import time
 
@@ -160,31 +160,52 @@ f = 5   # 3rd number of index
 a1 = 5 + e
 a2 = a3 = -1
 
-N = 20
-# N = 900 + 10 * c + d   # size of matrix A
+N = 900 + 10 * c + d   # size of matrix A
 
-A = np.zeros(shape=[N, N])
-b = np.empty(shape=[N, 1])
 
-# creation of band matrix A and vector B
-for i in range(N):
-    A[i][i] = a1  # creation of diagonal
-    b[i] = np.sin((i + 1) * (f + 1))  # angle in radians
-    if i < N - 1:
-        A[i + 1][i] = a2
-        A[i][i + 1] = a2
-    if i < N - 2:
-        A[i + 2][i] = a3
-        A[i][i + 2] = a3
+# LU_sol, LU_time = LU(A, b, N)
+# Jacobi_sol, Jacobi_iter, Jacobi_time = Jacobi(A, b, N)
 
-LU_sol, LU_time = LU(A, b, N)
-Jacobi_sol, Jacobi_iter, Jacobi_time = Jacobi(A, b, N)
+# Task E data preparation
+size = [(i + 1) * 100 for i in range(10)]
+LU_duration = []
+Jacobi_duration = []
+Gauss_duration = []
 
-print(vector_norm(np.dot(A, LU_sol) - b))
+# TASK E
+for s in size:
+    A = np.zeros(shape=[s, s])
+    b = np.empty(shape=[s, 1])
 
-for i in range(N):
-    print(LU_sol[i], Jacobi_sol[i], sep=' ')
+    # creation of band matrix A and vector B
+    for i in range(s):
+        A[i][i] = a1  # creation of diagonal
+        b[i] = np.sin((i + 1) * (f + 1))  # angle in radians
+        if i < s - 1:
+            A[i + 1][i] = a2
+            A[i][i + 1] = a2
+        if i < s - 2:
+            A[i + 2][i] = a3
+            A[i][i + 2] = a3
+    Jacobi_sol, Jacobi_iter, Jacobi_time = Jacobi(A, b, s)
+    Gauss_sol, Gauss_iter, Gauss_time = Gauss_Seidel(A, b, s)
+    LU_sol, LU_time = LU(A, b, s)
+    Jacobi_duration.append(Jacobi_time)
+    Gauss_duration.append(Gauss_time)
+    LU_duration.append(LU_time)
 
+# Chart of duration time for all implemented algorithms
+plt.plot(size, Jacobi_duration, label='Metoda Jacobiego')
+plt.plot(size, Gauss_duration, label='Metoda Gaussa-Seidela')
+plt.plot(size, LU_duration, label='Faktoryzacja LU')
+plt.title("Wykres czasu trwania algorytmow od wielkosci macierzy")
+plt.xlabel("Wielkosc macierzy [n]")
+plt.ylabel("Czas trwania [s]")
+plt.legend()
+plt.show()
+
+
+# TASK B
 # Gauss_sol, Gauss_iter, Gauss_time = Gauss_Seidel(A, b, N)
 # Jacobi_sol, Jacobi_iter, Jacobi_time = Jacobi(A, b, N)
 
